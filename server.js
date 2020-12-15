@@ -40,7 +40,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb+srv://alumnimanagementsystem:Mits1234@cluster0.y4jpq.mongodb.net/AlumniManagementSystem?retryWrites=true&w=majority', {
   useNewUrlParser: true
-});
+},{ useUnifiedTopology: true } );
 
 // mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 

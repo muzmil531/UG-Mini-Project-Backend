@@ -72,12 +72,19 @@ module.exports.register = (req, res, next) => {
                 });
         }
         catch (err) {
-            return res.json({ Message: "Terminated at the process of encryption" })
+            return res.json({ error: "Terminated at the process of encryption" })
         }
     })
 
 }
-
+function decryption(data){
+    const key = crypto.scryptSync(passwordforencrypt, 'salt', 32);
+    const iv = '8319187798918317';
+    const decipher = crypto.createDecipheriv(algorithm, key, iv);
+    let decrypted = decipher.update(data, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted
+}
 
 
 module.exports.login = (req, res, next) => {
@@ -99,7 +106,7 @@ module.exports.login = (req, res, next) => {
                 .then(student => {
                     console.log(student)
                     if (student.length < 1) {
-                        return res.status(401).json({
+                        return res.json({
                             message: "Not a registered user"
                         });
                     }
@@ -129,12 +136,12 @@ module.exports.login = (req, res, next) => {
                                 }
                                 else {
                                     // LOGIN FAILURE and SENDING MESSAGE CODE
-                                    res.json({ message: 5 })
+                                    res.json({ message: "Invalid Credentials" })
                                 }
                             })
                         } catch (error) {
                             // res.json("UNABLE TO PROCESS")
-                            res.json({ message: 3 })
+                            res.json({ message: "UNABLE TO PROCESS" })
                         }
                     }
                 })
@@ -146,7 +153,7 @@ module.exports.login = (req, res, next) => {
                 });
         } catch (err) {
             // res.json("UNABLE TO PROCESS")
-            res.json({ message: 3 })
+            res.json({ message: "UNABLE TO PROCESS" })
         }
     });
 }
@@ -163,7 +170,9 @@ exports.profile = (req, res) => {
         }
         else if (result) {
             // console.log(result)
+            result.email=decryption(result.email)
             res.json(result)
         }
     })
 }
+

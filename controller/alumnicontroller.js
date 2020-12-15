@@ -1,14 +1,24 @@
 const mongoose = require('mongoose');
 
-const bcrypt=require('bcrypt');
+const bcrypt = require('bcrypt');
 var crypto = require('crypto');
 
+const jwt = require('jsonwebtoken')
 
 const alumni = require('../models/alumnimodel')
 
 
 const algorithm = 'aes-256-ctr';
 const passwordforencrypt = 'RJ23edrf';
+
+function decryption(data){
+    const key = crypto.scryptSync(passwordforencrypt, 'salt', 32);
+    const iv = '8319187798918317';
+    const decipher = crypto.createDecipheriv(algorithm, key, iv);
+    let decrypted = decipher.update(data, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted
+}
 
 
 module.exports.register = (req, res, next) => {
@@ -74,7 +84,7 @@ module.exports.register = (req, res, next) => {
                 });
         }
         catch (err) {
-            return res.json({message:"UNABle to proceSS"});
+            return res.json({error:"UNABle to proceSS"});
         }
     })
 
@@ -152,12 +162,11 @@ module.exports.login = (req, res, next) => {
                                 }
                                 else {
                                     // LOGIN FAILURE and SENDING MESSAGE CODE
-                                    res.json({ message: 5 })
-                                }
+                                    res.json({ message: "Invalid Credentials" })                                }
                             })
                         } catch (error) {
                             // res.json("UNABLE TO PROCESS")
-                            res.json({ message: 3 })
+                            res.json({ message: "UNABLE TO PROCESS" })
                         }
                     }
                 })
@@ -169,7 +178,7 @@ module.exports.login = (req, res, next) => {
                 });
         } catch (err) {
             // res.json("UNABLE TO PROCESS")
-            res.json({ message: 3 })
+            res.json({ message: "UNABLE TO PROCESS" })
         }
     });
 }
@@ -186,6 +195,8 @@ exports.profile = (req, res) => {
         }
         else if (result) {
             // console.log(result)
+            result.email=decryption(result.email)
+
             res.json(result)
         }
     })

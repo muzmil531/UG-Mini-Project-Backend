@@ -14,6 +14,10 @@ const alumnicontrol=require('../controller/alumnicontroller');
 
 router.post('/alumniregister', alumnicontrol.register);
 
+router.post('/alumnilogin', alumnicontrol.login)
+
+router.get('/alumniprofile',alumnicontrol.profile)
+
 router.post('/alumniupdate/:id', alumnicontrol.update);
 
 
