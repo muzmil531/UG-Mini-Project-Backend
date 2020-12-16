@@ -30,6 +30,10 @@ let alumnimodel=new Schema({
         type:Boolean,
         default:false
     },
+    contactnumber:{
+        type:String,
+        default:"9999999999"
+    },
     roleid:{
         type:Number,
         default:2

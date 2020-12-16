@@ -61,6 +61,7 @@ module.exports.register = (req, res, next) => {
                                     password: hash,
                                     companyname: req.body.companyname,
                                     role: req.body.role,
+                                    contactnumber:req.body.contactnumber,
                                     skillset: req.body.skillset,
                                     domain: req.body.domain
                                 });
