@@ -18,6 +18,10 @@ let adminmodel=new Schema({
     },
     jobiid:{
         type:String
+    },
+    adminuser:{
+        type:Boolean,
+        default:true
     }
 })
 

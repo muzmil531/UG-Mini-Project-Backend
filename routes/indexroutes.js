@@ -7,6 +7,14 @@ const router =  express.Router();
 const admincontrolle=require('../controller/admincontroller')
 router.post('/adminregister',admincontrolle.register)
 
+router.post('/adminlogin',admincontrolle.login)
+
+router.get('/adminprofile', admincontrolle.profile)
+
+router.get('/getallalumnis', admincontrolle.getallalumnis)
+
+router.post('/alumnistatusapproval',admincontrolle.updatealumnistatus)
+
 // ADMIN CONTROLS ENDS
 
 // ALUMNI CONTROLS STARTS

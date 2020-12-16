@@ -3,12 +3,13 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 var crypto = require('crypto');
 
+const jwt = require('jsonwebtoken')
 
 // const alumni = require('../models/alumnimodel')
 // const studentmodel=require('../models/studentmodel')
 
 const adminmodel=require('../models/adminmodel')
-
+const alumnimodel=require('../models/alumnimodel')
 
 const algorithm = 'aes-256-ctr';
 const passwordforencrypt = 'RJ23edrf';
@@ -122,18 +123,17 @@ module.exports.login = (req, res, next) => {
                                         }
                                     );
                                     return res.status(200).json({
-                                        token: token,
+                                         token: token,
                                         message: "Success"
                                     });
                                 }
                                 else {
                                     // LOGIN FAILURE and SENDING MESSAGE CODE
-                                    res.json({ message: 5 })
-                                }
+                                    res.json({ error: "Invalid Credentials" })                                                                }
                             })
                         } catch (error) {
                             // res.json("UNABLE TO PROCESS")
-                            res.json({ message: 3 })
+                            res.json({ error: "UNABLE TO PROCESS" })
                         }
                     }
                 })
@@ -145,12 +145,23 @@ module.exports.login = (req, res, next) => {
                 });
         } catch (err) {
             // res.json("UNABLE TO PROCESS")
-            res.json({ message: 3 })
+                            res.json({ error: "UNABLE TO PROCESS" })
         }
     });
 }
 
-exports.profile = (req, res) => {
+
+function decryption(data){
+    const key = crypto.scryptSync(passwordforencrypt, 'salt', 32);
+    const iv = '8319187798918317';
+    const decipher = crypto.createDecipheriv(algorithm, key, iv);
+    let decrypted = decipher.update(data, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted
+}
+
+
+module.exports.profile = (req, res) => {
     var decoded = jwt.verify(req.headers['authorization'], 'secret')
     console.log(decoded._id);
 
@@ -161,8 +172,50 @@ exports.profile = (req, res) => {
             res.json({ message: "Unable to load profile" })
         }
         else if (result) {
-            // console.log(result)
+            console.log(result)
+            
+            result.email=decryption(result.email)
             res.json(result)
         }
     })
+}
+
+module.exports.getallalumnis=(req,res)=>{
+    try {
+        alumnimodel.find({},(request,response)=>{
+            if(request){
+                res.json({error:"UNABLE TO FOUND ALUMNI"})
+            }
+
+            if(response.length < 1){
+                res.json({error:"NO ALUMNI's FOUND"})
+            }
+            else{
+                for (let i = 0; i < response.length; i++) {
+                    response[i].email=decryption(response[i].email)               
+                }
+                res.json(response)
+            }            
+        })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+module.exports.updatealumnistatus=(req,res)=>{
+
+    try {
+        alumnimodel.findByIdAndUpdate(req.body.id,{approvedalumni:req.body.status},(err,docs)=>{
+            if(err){
+                console.log(err);
+                res.json({error:"Unable to process... Refresh your browser and try again..."})
+            }
+            if(docs){
+                res.json({message:"Updated successfully..."})
+            }
+        })
+    } catch (error) {
+        console.log(error)
+        res.json({error:"Unable to process... Try again later..."})
+    }
 }
